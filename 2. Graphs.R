@@ -31,7 +31,7 @@ pacman::p_load(dplyr,stringr,sp,ggplot2,plyr,readODS,
 
 #font_add_google("Roboto Mono", "roboto-mono")
 #font_add_google("Roboto", "roboto")
-#font_add_google("Quicksand", "quicksand")
+font_add_google("Quicksand", "quicksand")
 showtext_auto()
 
 #Clean up the global environment
@@ -207,7 +207,7 @@ ggplot(filter(SPL_by_LA_dgroup,group=="Rare genetic and autoimmune"), aes(x=Case
 ################### Number of shielders vs. deprivation ##############
 ######################################################################
 
-SPL_by_LA_All <- left_join(SPL_by_LA_All,IMD2019_LA_wide,by=c("LA.Code"="FeatureCode"))
+#SPL_by_LA_All <- left_join(SPL_by_LA_All,IMD2019_LA_wide,by=c("LA.Code"="FeatureCode"))
 
 #SPL_by_LA_All$score_income_cat <- cut(SPL_by_LA_All$avgscore_income, breaks=c(0,0.05,0.075,0.1,0.125,0.150,0.2,Inf), labels=1:7)
 
@@ -251,8 +251,10 @@ pct_shielding_by_income_dep <- SPL_by_LA_All[, list(
 cols <- colorRampPalette(brewer.pal(n = 9, name = "RdYlGn"))(10)
 deplabs <- c("1 (most deprived)",2:9,"10 (least deprived)")
 
+as_tibble(pct_shielding_by_income_dep)
+
 by_deprivation <- ggplot(pct_shielding_by_income_dep) +
-  geom_chicklet(aes(x=decile_income, y = Shielders_pct,fill=decile_income),
+  geom_chicklet(aes(x=factor(decile_income), y = Shielders_pct,fill=factor(decile_income)),
                 radius = grid::unit(5, 'mm'),width = 0.75) +
   geom_text(aes(x = decile_income, y = Shielders_pct + 0.2,
                 label = paste0(round(Shielders_pct, 1),"%")),
@@ -286,10 +288,6 @@ ggsave(paste0(onedrivegraphs,"by_deprivation.png"), by_deprivation, device="png"
 head(dplyr::arrange(SPL_by_LA_All, pct_over65_18),n=10)
 tail(dplyr::arrange(SPL_by_LA_All, pct_over65_18),n=10)
 
-SPL_by_LA_All <- mutate(SPL_by_LA_All,
-                        cat_pct_over65_18=cut(pct_over65_18, breaks=c(0,15,20,25,Inf),
-                                              labels=c("15% or less","15-20%","20-25%","25% or more")))
-
 SPL_by_LA_All <- as.data.table(SPL_by_LA_All)
 
 pct_shielding_by_ageg <- SPL_by_LA_All[, list(
@@ -300,7 +298,7 @@ cols <- brewer.pal(n = 8, name = "GnBu")[5:8]
 agelabs <- c("<15% over 65","15-20% over 65","20-25% over 65",">25% over 65")
   
 plot_age <- ggplot(pct_shielding_by_ageg) +
-  geom_chicklet(aes(x=cat_pct_over65_18, y = Shielders_pct,fill=cat_pct_over65_18),
+  geom_chicklet(aes(x=factor(cat_pct_over65_18), y = Shielders_pct,fill=factor(cat_pct_over65_18)),
                 radius = grid::unit(5, 'mm'),width=0.5) +
   geom_text(aes(x = cat_pct_over65_18, y = Shielders_pct + 0.2,
                 label = paste0(round(Shielders_pct, 1),"%")),
