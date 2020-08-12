@@ -36,15 +36,13 @@ latlong="+init=epsg:4326"
 rawdatadir <- "M:/Analytics/Networked Data Lab/Shielding/"
 
 #Git directory
-gitdir <- "M:/Analytics/Networked Data Lab/COVID19_shielding/"
+gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 
 ##############################################
 ################### GEO-DATA #################
 ##############################################
 
-setwd(rawdatadir)
-
-OA_to_higher_geo <- fread("Other data/Output_Area_to_LSOA_to_MSOA_to_Local_Authority_District__December_2017__Lookup_with_Area_Classifications_in_Great_Britain.csv", header=TRUE, sep=",", check.names=T)
+OA_to_higher_geo <- fread(paste0(rawdatadir,"Other data/Output_Area_to_LSOA_to_MSOA_to_Local_Authority_District__December_2017__Lookup_with_Area_Classifications_in_Great_Britain.csv"), header=TRUE, sep=",", check.names=T)
 
 LSOA_to_higher_geo <- OA_to_higher_geo[, list(LSOA11NM = first(LSOA11NM), MSOA11CD = first(MSOA11CD),
                                               LAD17CD = first(LAD17CD), LAD17NM=first(LAD17NM),
@@ -59,10 +57,7 @@ rm(OA_to_higher_geo)
 
 #England and Wales
 
-setwd(rawdatadir)
-setwd("Other data/Mid-year population estimates/LSOA/")
-
-pop_by_LSOA <- fread("2011-to-2018-pop-post.csv", header=TRUE, sep=",", check.names=T,
+pop_by_LSOA <- fread(paste0(rawdatadir,"Other data/Mid-year population estimates/LSOA/2011-to-2018-pop-post.csv"), header=TRUE, sep=",", check.names=T,
                      select=c("lsoa11","pop18","children18","adults16plus18","over65_18","mean_age_18")) %>%
   mutate(.,pct_over65_18=round(over65_18/pop18*100,1))
 
@@ -92,15 +87,13 @@ pop_by_LA <- mutate(pop_by_LA,
 ################### DEPRIVATION ##############
 ##############################################
 
-setwd(rawdatadir)
-
-#LSOA level
-
-IMD2019_LSOA <- fread("Other data/IMD/IMD_19_15_10.csv", header=TRUE, sep=",", check.names=T)
+# #LSOA level
+# 
+# IMD2019_LSOA <- fread("Other data/IMD/IMD_19_15_10.csv", header=TRUE, sep=",", check.names=T)
 
 #LA level
 
-IMD2019_LA <- fread("Other data/IMD/Local authority/download1677836969253211150.csv", header=TRUE, sep=",", check.names=T) %>%
+IMD2019_LA <- fread(paste0(rawdatadir,"Other data/IMD/Local authority/download1677836969253211150.csv"), header=TRUE, sep=",", check.names=T) %>%
   filter(.,DateCode==2019)
 
 ranks <- select(IMD2019_LA,'Measurement','Value','Indices.of.Deprivation') %>%
@@ -171,10 +164,8 @@ IMD2019_LA_wide <- left_join(IMD2019_LA_avgscore_IMD,IMD2019_LA_avgscore_Health,
 ################### NUMBER OF SHIELDERS BY LA: Wales ################### 
 ########################################################################
 
-setwd(rawdatadir)
-setwd("SPL/Wales/")
+SPL_by_LA_Wales <- read_ods(paste0(rawdatadir,"SPL/Wales/shielded-patient-list-in-wales-during-the-coronavirus-covid-19-pandemic-as-at-27-july-2020-182.ods"), skip=4,sheet="Table_1",col_names=TRUE)
 
-SPL_by_LA_Wales <- read_ods("shielded-patient-list-in-wales-during-the-coronavirus-covid-19-pandemic-as-at-27-july-2020-182.ods", skip=4,sheet="Table_1",col_names=TRUE)
 SPL_by_LA_Wales <- dplyr::filter(SPL_by_LA_Wales,is.na(SPL_by_LA_Wales$'Local Authority Code')==FALSE) %>%
   rename(.,LA.Code='Local Authority Code',Patient.Count='All Ages',LA.Name='Local Authority Name') %>%
   select(.,LA.Code,Patient.Count,LA.Name)
@@ -191,9 +182,7 @@ SPL_by_LA_Wales_All$Breakdown.Field <- "ALL"
 ################### NUMBER OF SHIELDERS BY LA: England and Wales ################### 
 ####################################################################################
 
-setwd(rawdatadir)
-
-SPL_by_LA <- fread("SPL/Coronavirus Shielded Patient List, England - Open Data with CMO DG - LA - 2020-07-30.csv", header=TRUE, sep=",", check.names=T)
+SPL_by_LA <- fread(paste0(rawdatadir,"SPL/Coronavirus Shielded Patient List, England - Open Data with CMO DG - LA - 2020-07-30.csv"), header=TRUE, sep=",", check.names=T)
 
 SPL_by_LA <- rbind.fill(SPL_by_LA,SPL_by_LA_Wales_All)
 
@@ -227,10 +216,7 @@ SPL_by_LA_All <- left_join(SPL_by_LA_All,IMD2019_LA_wide,by=c("LA.Code"="Feature
 
 ############ Save
 
-setwd(gitdir)
-setwd("Clean data")
-
-fwrite(SPL_by_LA_All, file = "SPL_by_LA_All.csv", sep = ",")
+fwrite(SPL_by_LA_All, file = here::here("Clean data","SPL_by_LA_All.csv"), sep = ",")
 
 ############ Number of shielders by disease group
 
@@ -300,7 +286,4 @@ filter(SPL_by_LA_dgroup,LA.Name=="Liverpool")
 
 ############ Save
 
-setwd(gitdir)
-setwd("Clean data")
-
-fwrite(SPL_by_LA_dgroup, file = "SPL_by_LA_dgroup.csv", sep = ",")
+fwrite(SPL_by_LA_dgroup, file = here::here("Clean data","SPL_by_LA_dgroup.csv"), sep = ",")

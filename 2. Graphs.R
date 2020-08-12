@@ -31,7 +31,7 @@ pacman::p_load(dplyr,stringr,sp,ggplot2,plyr,readODS,
 
 #font_add_google("Roboto Mono", "roboto-mono")
 #font_add_google("Roboto", "roboto")
-font_add_google("Quicksand", "quicksand")
+#font_add_google("Quicksand", "quicksand")
 showtext_auto()
 
 #Clean up the global environment
@@ -45,27 +45,24 @@ latlong="+init=epsg:4326"
 rawdatadir <- "M:/Analytics/Networked Data Lab/Shielding/"
 
 #Git directory
-gitdir <- "M:/Analytics/Networked Data Lab/COVID19_shielding/"
+gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
+
+#One Drive directory for graphs
+onedrivegraphs <- "C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/"
 
 ############################################
 ################### Load data ##############
 ############################################
 
-setwd(gitdir)
-setwd("Clean data")
+SPL_by_LA_dgroup <- fread(here::here("Clean data","SPL_by_LA_dgroup.csv"), header=TRUE, sep=",", check.names=T)
 
-SPL_by_LA_dgroup <- fread("SPL_by_LA_dgroup.csv", header=TRUE, sep=",", check.names=T)
-
-SPL_by_LA_All <- fread("SPL_by_LA_All.csv", header=TRUE, sep=",", check.names=T)
+SPL_by_LA_All <- fread(here::here("Clean data","SPL_by_LA_All.csv"), header=TRUE, sep=",", check.names=T)
 
 ############################################################
 ################### Local authority shapefile ##############
 ############################################################
 
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("M:/Analytics/Networked Data Lab/Shielding/Shapefiles/Local_Authority_Districts__December_2016__Boundaries_UK-shp/")
-
-LAD_2019_shp <- readOGR(dsn=".", layer="Local_Authority_Districts__December_2016__Boundaries_UK")
+LAD_2019_shp <- readOGR(dsn=paste0(rawdatadir,"Shapefiles/Local_Authority_Districts__December_2016__Boundaries_UK-shp"), layer="Local_Authority_Districts__December_2016__Boundaries_UK")
 LAD_2019_shp <- spTransform(LAD_2019_shp, CRS(latlong)) #Set to the same projection
 
 #################################################################
@@ -107,10 +104,8 @@ windows()
 dotplot_gender
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("M:/Analytics/Networked Data Lab/Shielding/Graphs/")
 
-ggsave("dotplot_gender.png", device="png",width = 5, height = 5,dpi=500)
+ggsave(paste0(onedrivegraphs,"dotplot_gender.png"), dotplot_gender,device="png",width = 5, height = 5,dpi=500)
 
 ###########################################################
 ############## Reasons for shielding dot plot #############
@@ -130,10 +125,8 @@ windows()
 dotplot_condition
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("dotplot_condition.png", device="png",width = 10, height = 5,dpi=500)
+ggsave(paste0(onedrivegraphs,"dotplot_condition.png"), dotplot_condition, device="png",width = 10, height = 5,dpi=500)
 
 ###########################################################################
 ############## Bar chart per condition - national discrepancy #############
@@ -179,10 +172,8 @@ windows()
 respiratory
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("respiratory.png", device="png",width = 10, height = 7,dpi=500)
+ggsave(paste0(onedrivegraphs,"respiratory.png"), respiratory, device="png",width = 10, height = 7,dpi=500)
 
 #####Cancer
 
@@ -281,10 +272,8 @@ windows()
 by_deprivation
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("by_deprivation.png", device="png",width = 16, height = 4,dpi=500)
+ggsave(paste0(onedrivegraphs,"by_deprivation.png"), by_deprivation, device="png",width = 16, height = 4,dpi=500)
 
 ######################################################################
 ################### Number of shielders vs. pct over 65 ##############
@@ -331,10 +320,8 @@ windows()
 plot_age
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("over65.png", device="png",width = 5, height = 3,dpi=500)
+ggsave(paste0(onedrivegraphs,"over65.png"), plot_age, device="png",width = 5, height = 3,dpi=500)
 
 ##############################################################
 ################### Number of shielders per GOR ##############
@@ -381,10 +368,8 @@ windows()
 plot_by_gor
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("by_gor.png", device="png",width = 15, height = 4,dpi=500)
+ggsave(paste0(onedrivegraphs,"by_gor.png"), plot_by_gor, device="png",width = 15, height = 4,dpi=500)
 
 ##############################################################################
 ################### Waffle chart for number of people shielding ##############
@@ -413,56 +398,54 @@ windows()
 waffle_plot
 
 #Save chart
-setwd(str_replace_all(path.expand("~"), "Documents", ""))
-setwd("C:/Users/SebastienP/OneDrive - The Health Foundation/Shielding/Graphs/")
 
-ggsave("waffle.png", device="png",width = 5, height = 5,dpi=500)
+ggsave(paste0(onedrivegraphs,"waffle.png"), waffle_plot, device="png",width = 5, height = 5,dpi=500)
 
 #################################################################################
 ################### Map of number of shielders per 1,000 residents ##############
 #################################################################################
 
-#Add data to shapefile
-
-LAD_2019_shp@data <- left_join(LAD_2019_shp@data,SPL_by_LA_All,by=c("lad16cd"="LA.Code"))
-
-#Create map
-
-#Colors and palette
-colors <- colorRampPalette(brewer.pal(9, "Spectral"))(10)[10:1]
-
-pal.function <- colorQuantile(colors, LAD_2019_shp$Shielders_pct, n = 10, probs = seq(0, 1, length.out = 10
-                                                                                      + 1), na.color = "transparent", alpha = FALSE, reverse = FALSE,
-                              right = FALSE)
-
-#Quantiles
-deciles <- round(quantile(LAD_2019_shp$Shielders_pct,
-                          prob = seq(0, 1, length = 11), type = 5,na.rm=TRUE),1)
-
-#Labels
-labels <- sprintf(
-  "<strong>%s</strong><br/>%g percent",
-  LAD_2019_shp$lad16nm, round(LAD_2019_shp$Shielders_pct,2)
-) %>% lapply(htmltools::HTML)
-
-#Map
-leaflet(LAD_2019_shp) %>%
-  addProviderTiles(providers$Wikimedia) %>%
-  setView(lat=51.5095,lng=-0.1245,zoom = 5) %>%
-  addPolygons(
-    fillColor = ~pal.function(Shielders_pct),weight = 1,opacity = 0.1,color = "black",
-    dashArray = "3",fillOpacity = 0.3,
-    highlight = highlightOptions(weight = 5,color = "#666",dashArray = "",
-                                 fillOpacity = 0.7,bringToFront = TRUE),
-    label = labels,
-    labelOptions = labelOptions(
-      style = list("font-weight" = "normal", padding = "3px 8px"),
-      textsize = "15px",
-      direction = "auto")) %>% addLegend(
-        position = "bottomright",
-        colors = colors,
-        labels = deciles[1:10], opacity = 1
-      )
+# #Add data to shapefile
+# 
+# LAD_2019_shp@data <- left_join(LAD_2019_shp@data,SPL_by_LA_All,by=c("lad16cd"="LA.Code"))
+# 
+# #Create map
+# 
+# #Colors and palette
+# colors <- colorRampPalette(brewer.pal(9, "Spectral"))(10)[10:1]
+# 
+# pal.function <- colorQuantile(colors, LAD_2019_shp$Shielders_pct, n = 10, probs = seq(0, 1, length.out = 10
+#                                                                                       + 1), na.color = "transparent", alpha = FALSE, reverse = FALSE,
+#                               right = FALSE)
+# 
+# #Quantiles
+# deciles <- round(quantile(LAD_2019_shp$Shielders_pct,
+#                           prob = seq(0, 1, length = 11), type = 5,na.rm=TRUE),1)
+# 
+# #Labels
+# labels <- sprintf(
+#   "<strong>%s</strong><br/>%g percent",
+#   LAD_2019_shp$lad16nm, round(LAD_2019_shp$Shielders_pct,2)
+# ) %>% lapply(htmltools::HTML)
+# 
+# #Map
+# leaflet(LAD_2019_shp) %>%
+#   addProviderTiles(providers$Wikimedia) %>%
+#   setView(lat=51.5095,lng=-0.1245,zoom = 5) %>%
+#   addPolygons(
+#     fillColor = ~pal.function(Shielders_pct),weight = 1,opacity = 0.1,color = "black",
+#     dashArray = "3",fillOpacity = 0.3,
+#     highlight = highlightOptions(weight = 5,color = "#666",dashArray = "",
+#                                  fillOpacity = 0.7,bringToFront = TRUE),
+#     label = labels,
+#     labelOptions = labelOptions(
+#       style = list("font-weight" = "normal", padding = "3px 8px"),
+#       textsize = "15px",
+#       direction = "auto")) %>% addLegend(
+#         position = "bottomright",
+#         colors = colors,
+#         labels = deciles[1:10], opacity = 1
+#       )
 	  
 # ggplot(filter(SPL_by_LA_dgroup,group=="Respiratory")) +
 #   ylim(0, 10) +
