@@ -15,8 +15,8 @@ This projects pools together different sources of data on Shielding patients:
 
 This is linked the local authority-level ONS datasets on:
 
-- Local deprivation (Index of Multiple Deprivation domains)
-- Population estimates (mid-year estimates)
+- Local deprivation ([Index of Multiple Deprivation](https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019) domains)
+- Population estimates ([mid-year estimates](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland))
 - Age structure (% over 65)
 
 ## How does it work?
