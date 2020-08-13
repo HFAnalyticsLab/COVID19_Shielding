@@ -10,8 +10,8 @@ This is an exploratory analysis of Open Data on shielding patients, with the pur
 
 This projects pools together different sources of data on Shielding patients:
 
-- The Shielding Patient List (England) split by local authority, gender, age group and reason for shielding
-- The Shielding Patient List (Wales) split by local authority
+- The Shielding Patient List ([England](https://digital.nhs.uk/dashboards/shielded-patient-list-open-data-set)) split by local authority, gender, age group and reason for shielding
+- The Shielding Patient List ([Wales](https://gov.wales/shielded-patient-list-wales-during-coronavirus-covid-19-pandemic-15-june-2020)) split by local authority
 
 This is linked the local authority-level ONS datasets on:
 
