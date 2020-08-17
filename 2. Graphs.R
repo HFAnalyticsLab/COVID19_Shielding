@@ -105,7 +105,7 @@ dotplot_gender
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"dotplot_gender.png"), dotplot_gender,device="png",width = 5, height = 5,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","dotplot_gender.png"), dotplot_gender,device="png",width = 5, height = 5,dpi=500)
 
 ###########################################################
 ############## Reasons for shielding dot plot #############
@@ -126,7 +126,7 @@ dotplot_condition
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"dotplot_condition.png"), dotplot_condition, device="png",width = 10, height = 5,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","dotplot_condition.png"), dotplot_condition, device="png",width = 10, height = 5,dpi=500)
 
 ###########################################################################
 ############## Bar chart per condition - national discrepancy #############
@@ -173,7 +173,7 @@ respiratory
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"respiratory.png"), respiratory, device="png",width = 10, height = 7,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","respiratory.png"), respiratory, device="png",width = 10, height = 7,dpi=500)
 
 #####Cancer
 
@@ -275,7 +275,7 @@ by_deprivation
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"by_deprivation.png"), by_deprivation, device="png",width = 16, height = 4,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","by_deprivation.png"), by_deprivation, device="png",width = 16, height = 4,dpi=500)
 
 ######################################################################
 ################### Number of shielders vs. pct over 65 ##############
@@ -319,7 +319,7 @@ plot_age
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"over65.png"), plot_age, device="png",width = 5, height = 3,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","over65.png"), plot_age, device="png",width = 5, height = 3,dpi=500)
 
 ##############################################################
 ################### Number of shielders per GOR ##############
@@ -367,7 +367,7 @@ plot_by_gor
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"by_gor.png"), plot_by_gor, device="png",width = 15, height = 4,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","by_gor.png"), plot_by_gor, device="png",width = 15, height = 4,dpi=500)
 
 ##############################################################################
 ################### Waffle chart for number of people shielding ##############
@@ -397,7 +397,7 @@ waffle_plot
 
 #Save chart
 
-ggsave(paste0(onedrivegraphs,"waffle.png"), waffle_plot, device="png",width = 5, height = 5,dpi=500)
+ggsave(paste0(gitdir,"/Charts/","waffle.png"), waffle_plot, device="png",width = 5, height = 5,dpi=500)
 
 #################################################################################
 ################### Map of number of shielders per 1,000 residents ##############
