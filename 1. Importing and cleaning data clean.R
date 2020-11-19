@@ -39,7 +39,7 @@ LA_to_higher_geo <- fread(paste0(rawdatadir,"Other data/Local_Authority_District
 pop_by_LA <- read_excel(paste0(rawdatadir,"Other data/Mid-year population estimates/LA/ukmidyearestimates20192019ladcodes.xlsx"),
                         sheet = "MYE2 - Persons",skip=4) %>%
   select(.,Code,Name,`All ages`,age65plus) %>%
-  rename(.,LAD19CD=Code,LAD19NM=Name,pop19=`All ages`) %>%
+  dplyr::rename(.,LAD19CD=Code,LAD19NM=Name,pop19=`All ages`) %>%
   filter(.,!is.na(LAD19NM)) %>%
   mutate(.,pct_over65_18=age65plus/pop19*100) %>%
   as.data.table()
@@ -64,19 +64,19 @@ IMD2019_LA <- fread(paste0(rawdatadir,"Other data/IMD/Local authority/download16
 
 ranks <- select(IMD2019_LA,'Measurement','Value','Indices.of.Deprivation') %>%
   filter(.,Measurement=="Rank of average score"&Indices.of.Deprivation=="a. Index of Multiple Deprivation (IMD)") %>%
-  select(.,'Value') %>% unique(.)
+  select(.,'Value') %>% unique(.) %>% arrange(.,Value)
 
 #LA level - rank of average score
 
 IMD2019_LA_rank_IMD <- filter(IMD2019_LA,Measurement=='Rank of average score'&
                                 Indices.of.Deprivation=='a. Index of Multiple Deprivation (IMD)') %>%
-  rename(.,rank_imd=Value) %>% select(.,FeatureCode,rank_imd) %>%
+  dplyr::rename(.,rank_imd=Value) %>% select(.,FeatureCode,rank_imd) %>%
   mutate(.,decile_imd=cut(rank_imd, breaks=c(0,quantile(ranks$Value, probs = seq(0, 1, 1/10))[-1]), labels=1:10),
          quintile_imd=cut(rank_imd, breaks=c(0,quantile(ranks$Value, probs = seq(0, 1, 1/5))[-1]), labels=1:5))
 
 IMD2019_LA_rank_Income <- filter(IMD2019_LA,Measurement=='Rank of average score'&
                                    Indices.of.Deprivation=='b. Income Deprivation Domain') %>%
-  rename(.,rank_income=Value) %>% select(.,FeatureCode,rank_income) %>%
+  dplyr::rename(.,rank_income=Value) %>% select(.,FeatureCode,rank_income) %>%
   mutate(.,decile_income=cut(rank_income, breaks=c(0,quantile(ranks$Value, probs = seq(0, 1, 1/10))[-1]), labels=1:10),
          quintile_income=cut(rank_income, breaks=c(0,quantile(ranks$Value, probs = seq(0, 1, 1/5))[-1]), labels=1:5))
 
@@ -91,7 +91,7 @@ IMD2019_LA_wide <- left_join(IMD2019_LA_rank_IMD,IMD2019_LA_rank_Income,by="Feat
 SPL_by_LA_Wales_All <- read_ods(paste0(rawdatadir,"SPL/Wales/shielded-patient-list-in-wales-during-the-coronavirus-covid-19-pandemic-as-at-27-july-2020-182.ods"), skip=4,sheet="Table_1",col_names=TRUE)
 
 SPL_by_LA_Wales_All <- dplyr::filter(SPL_by_LA_Wales_All,is.na(SPL_by_LA_Wales_All$'Local Authority Code')==FALSE) %>%
-  rename(.,LA.Code='Local Authority Code',Patient.Count='All Ages',LA.Name='Local Authority Name') %>%
+  dplyr::rename(.,LA.Code='Local Authority Code',Patient.Count='All Ages',LA.Name='Local Authority Name') %>%
   select(.,LA.Code,Patient.Count,LA.Name)
 
 ############ All shielders: Wales
@@ -104,11 +104,11 @@ SPL_by_LA_Wales_All$Breakdown.Field <- "ALL"
 
 fwrite(SPL_by_LA_Wales_All, file = here::here("Clean data","SPL_by_LA_Wales_All.csv"), sep = ",")
 
-####################################################################################
-################### NUMBER OF SHIELDERS BY LA: England and Wales ################### 
-####################################################################################
+##########################################################################
+################### NUMBER OF SHIELDERS BY LA: England ################### 
+##########################################################################
 
-SPL_by_LA <- fread(paste0(rawdatadir,"SPL/England/September/Coronavirus Shielded Patient List, England - Open Data with CMO DG - LA - 2020-09-16.csv"), header=TRUE, sep=",", check.names=T)
+SPL_by_LA <- fread(paste0(rawdatadir,"SPL/England/October/Coronavirus Shielded Patient List, England - Open Data with CMO DG - LA - 2020-10-28.csv"), header=TRUE, sep=",", check.names=T)
 
 ############ Merge in population numbers (you will lose some Local Authorities - the way the SPL is structured is non-standard)
 
@@ -116,7 +116,7 @@ SPL_by_LA <- fread(paste0(rawdatadir,"SPL/England/September/Coronavirus Shielded
 
 SPL_by_LA$LA.Code[which(SPL_by_LA$LA.Code=="ENG")] <- "E92000001"
 
-#Merge in population
+#Merge in population numbers
 
 nrow(SPL_by_LA)
 SPL_by_LA <- left_join(SPL_by_LA,pop_by_LA,by=c("LA.Code"="LAD19CD"))
@@ -165,19 +165,59 @@ SPL_by_LA_All <- dplyr::filter(SPL_by_LA_All, !is.na(RGN19NM))
 
 ############ Save
 
+fwrite(SPL_by_LA_All_incl_ENG, file = here::here("Clean data","SPL_by_LA_All_incl_ENG.csv"), sep = ",")
 fwrite(SPL_by_LA_All, file = here::here("Clean data","SPL_by_LA_All.csv"), sep = ",")
+
+############ Number of shielders by sex
+
+#Subset of data
+SPL_by_LA_gender <- filter(SPL_by_LA,Breakdown.Field=="Gender") %>%
+  dplyr::rename(.,Patient.Count.Sex=Patient.Count)
+
+#Clean up number variable
+SPL_by_LA_gender$Patient.Count.Sex[which(SPL_by_LA_gender$Patient.Count.Sex=="*")] <- NA
+SPL_by_LA_gender$Patient.Count.Sex <- as.numeric(SPL_by_LA_gender$Patient.Count.Sex)
+
+#Merge-in the Total counts
+SPL_by_LA_gender <- left_join(SPL_by_LA_gender,select(SPL_by_LA_All_incl_ENG,LA.Code,Patient.Count),
+                                by="LA.Code")
+#Save
+fwrite(SPL_by_LA_gender, file = here::here("Clean data","SPL_by_LA_gender.csv"), sep = ",")
+
+############ Number of shielders by age group
+
+#Subset of data
+SPL_by_LA_agegroup <- filter(SPL_by_LA,Breakdown.Field=="Age") %>%
+  dplyr::rename(.,Patient.Count.Age=Patient.Count)
+
+#Clean up number variable
+SPL_by_LA_agegroup$Patient.Count.Age[which(SPL_by_LA_agegroup$Patient.Count.Age=="*")] <- NA
+SPL_by_LA_agegroup$Patient.Count.Age <- as.numeric(SPL_by_LA_agegroup$Patient.Count.Age)
+
+#Merge-in the Total counts
+SPL_by_LA_agegroup <- left_join(SPL_by_LA_agegroup,select(SPL_by_LA_All_incl_ENG,LA.Code,Patient.Count),
+                              by="LA.Code")
+
+#Percentage of shielded patients shielding for a given reason
+SPL_by_LA_agegroup <- mutate(SPL_by_LA_agegroup,Patient.Pct=Patient.Count.Age/Patient.Count*100)
+
+#Save
+fwrite(SPL_by_LA_agegroup, file = here::here("Clean data","SPL_by_LA_agegroup.csv"), sep = ",")
 
 ############ Number of shielders by disease group
 
 #Subset of data
 SPL_by_LA_dgroup <- filter(SPL_by_LA,Breakdown.Field=="Disease Group") %>%
-  rename(.,Cases.Count=Patient.Count)
+  dplyr::rename(.,Cases.Count=Patient.Count)
 
 #Clean up number variable
 SPL_by_LA_dgroup$Cases.Count[which(SPL_by_LA_dgroup$Cases.Count=="*")] <- NA
 SPL_by_LA_dgroup$Cases.Count <- as.numeric(SPL_by_LA_dgroup$Cases.Count)
 
 #Simplify groups into 7 broad groups
+
+unique(SPL_by_LA_dgroup$Breakdown.Value)
+
 SPL_by_LA_dgroup$group <- mapvalues(SPL_by_LA_dgroup$Breakdown.Value,
                                     from = c("Transplants (Solid)","Transplants (Haematological within 6 months)",
                                              "Transplants (Haematological with Immunosuppression)",
