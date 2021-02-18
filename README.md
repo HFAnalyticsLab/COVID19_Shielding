@@ -59,7 +59,7 @@ If you would like to skip that first stage and directly produce the graphs, you 
 
 ## Authors
 
-* Sebastien Peytrignet - (Github: speytrignet-thg / Twitter: @SebastienPeytr2)
+* Sebastien Peytrignet - (Github: sg-peytrignet / Twitter: @SebastienPeytr2)
 
 ## License
 
