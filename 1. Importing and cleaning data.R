@@ -28,7 +28,7 @@ gitdir <- dirname(rstudioapi::getSourceEditorContext()$path)
 
 #England
 
-LA_to_higher_geo <- fread(paste0(rawdatadir,"Other data/Local_Authority_District_to_Region_(April_2019)_Lookup_in_England.csv"), header=TRUE, sep=",", check.names=T)
+LA_to_higher_geo <- fread(paste0(rawdatadir,"Other data/Lookups/Local_Authority_District_to_Region_(April_2019)_Lookup_in_England.csv"), header=TRUE, sep=",", check.names=T)
 
 ##############################################
 ################### POPULATION ###############

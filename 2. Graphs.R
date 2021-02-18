@@ -70,7 +70,10 @@ rate_women <- round(female_shielders/women_england*100,1)
 ############## Reasons for shielding dot plot #############
 ###########################################################
 
-dotplot_condition <- ggplot(filter(SPL_by_LA_dgroup,LA.Name=="ENGLAND"),
+reasons.data <- filter(SPL_by_LA_dgroup,LA.Name=="ENGLAND") %>%
+  select(.,group,Patient.Pct)
+
+dotplot_condition <- ggplot(reasons.data,
                             aes(Patient.Pct, reorder(group, Patient.Pct))) +
   geom_point(size=4,col="springgreen4") +
   geom_text(aes(x=Patient.Pct+2,label=paste0(round(Patient.Pct,0),"%")),
@@ -86,6 +89,7 @@ dotplot_condition
 #Save chart
 
 ggsave(paste0(gitdir,"/Charts/","dotplot_condition.png"), dotplot_condition, device="png",width = 10, height = 5,dpi=500)
+fwrite(reasons.data, file = paste0(gitdir,"/Charts/","reasons.data.csv"), sep = ",")
 
 ################################################################
 ############## Top 10 and Bottom 10 Shielding Pct ##############
@@ -292,7 +296,19 @@ ggsave(paste0(gitdir,"/Charts/","plot_reason_depquint.png"), plot_reason_depquin
 
 SPL_by_LA_All <- as.data.table(SPL_by_LA_All)
 
-SPL_by_GOR <- SPL_by_LA_All[, list(Shielders_pct=weighted.mean(Shielders_pct,pop19)), 
+# NW_shielders <- filter(SPL_by_LA_All,RGN19NM=="North West") %>%
+#   select(.,Patient.Count) %>% sum(.)
+# NW_pop <- filter(SPL_by_LA_All,RGN19NM=="North West") %>%
+#   select(.,pop19) %>% sum(.)
+# NW_rate <- round(NW_shielders/NW_pop*100,1)
+  
+# SPL_by_GOR <- SPL_by_LA_All[, list(Shielders_pct=weighted.mean(Shielders_pct,pop19)), 
+#                             by = list(RGN19NM)] %>%
+#   filter(.,RGN19NM!=""&RGN19NM!="Wales")
+
+SPL_by_GOR <- SPL_by_LA_All[, list(Patient.Count=sum(Patient.Count,na.rm=TRUE),
+                                   pop19=sum(pop19,na.rm=TRUE),
+  Shielders.pct=weighted.mean(Shielders_pct,pop19)), 
                             by = list(RGN19NM)] %>%
   filter(.,RGN19NM!=""&RGN19NM!="Wales")
 
@@ -305,39 +321,40 @@ nr_shielders_Scotland <- 179997
   #Source: https://www.publichealthscotland.scot/media/2763/covid-19-shielding-programme-scotland-impact-and-experience-survey_sept2020_english.pdf
 nr_shielders_NI <- 80000
   #Source: https://patientclientcouncil.hscni.net/covid-19-and-shielding/
+nr_UK <- nr_shielders_England+nr_shielders_Wales+nr_shielders_Scotland+nr_shielders_NI
 
 #Population numbers
 pop_Wales <- filter(pop_by_LA,LAD19NM=="WALES")$pop19
 pop_Scotland <- filter(pop_by_LA,LAD19NM=="SCOTLAND")$pop19
 pop_NI <- filter(pop_by_LA,LAD19NM=="NORTHERN IRELAND")$pop19
 pop_England <- filter(pop_by_LA,LAD19NM=="ENGLAND")$pop19
-pop_England <- filter(pop_by_LA,LAD19NM=="NORTH WEST")$pop19
+pop_UK <- pop_England+pop_Wales+pop_Scotland+pop_NI
 
 #Create dataframes
-Wales <- as.data.frame(t(c(nr_shielders_Wales/pop_Wales*100,"Wales")))
-names(Wales) <- names(SPL_by_GOR)[2:1]
+Wales <- as.data.frame(t(c("Wales",nr_shielders_Wales,pop_Wales,nr_shielders_Wales/pop_Wales*100)))
+names(Wales) <- names(SPL_by_GOR)
 
-Scotland <- as.data.frame(t(c(nr_shielders_Scotland/pop_Scotland*100,"Scotland")))
-names(Scotland) <- names(SPL_by_GOR)[2:1]
+Scotland <- as.data.frame(t(c("Scotland",nr_shielders_Scotland,pop_Scotland,nr_shielders_Scotland/pop_Scotland*100)))
+names(Scotland) <- names(SPL_by_GOR)
 
-NI <- as.data.frame(t(c(nr_shielders_NI/pop_NI*100,"Northern Ireland")))
-names(NI) <- names(SPL_by_GOR)[2:1]
+NI <- as.data.frame(t(c("Northern Ireland",nr_shielders_NI,pop_NI,nr_shielders_NI/pop_NI*100)))
+names(NI) <- names(SPL_by_GOR)
 
-Eng <- as.data.frame(t(c(nr_shielders_England/pop_England*100,"England")))
-names(Eng) <- names(SPL_by_GOR)[2:1]
+Eng <- as.data.frame(t(c("England",nr_shielders_England,pop_England,nr_shielders_England/pop_England*100)))
+names(Eng) <- names(SPL_by_GOR)
 
 SPL_by_GOR <- rbind(SPL_by_GOR,Scotland,NI,Wales)
 SPL_by_GOR_wEng <- rbind(SPL_by_GOR,Eng)
 
-SPL_by_GOR$Shielders_pct <- as.numeric(SPL_by_GOR$Shielders_pct)
+SPL_by_GOR$Shielders.pct <- as.numeric(SPL_by_GOR$Shielders.pct)
 
 #Chart
 
 plot_by_gor <- ggplot(SPL_by_GOR) +
-  geom_chicklet(aes(x=reorder(RGN19NM, Shielders_pct), y = Shielders_pct),
+  geom_chicklet(aes(x=reorder(RGN19NM, Shielders.pct), y = Shielders.pct),
                 fill = "firebrick",radius = grid::unit(5, 'mm'),width=0.50) +
-  geom_text(aes(x = RGN19NM, y = Shielders_pct + 0.3,
-                label = paste0(round(Shielders_pct, 1),"%")),
+  geom_text(aes(x = RGN19NM, y = Shielders.pct + 0.3,
+                label = paste0(round(Shielders.pct, 1),"%")),
             size=5) +
   theme(axis.title.x = element_blank(),
         panel.border = element_blank(),
