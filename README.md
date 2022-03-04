@@ -1,6 +1,6 @@
 # Shielding patients
 
-#### Project Status: In progress
+#### Project Status: Completed
 
 ## Project Description
 
