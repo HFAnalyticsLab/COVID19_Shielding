@@ -27,27 +27,21 @@ In order to run the first .R code ('1. Importing and cleaning data.R') you will 
 
 The following R packages (available on CRAN) are needed: 
 
-dplyr
-stringr
-sp
-ggplot2
-plyr
-readODS
-gmodels
-Rmisc
-DescTools
-data.table
-Hmisc
-leaflet
-rgeos
-raster
-plotly
-here
-rgdal
-RColorBrewer
-ggthemes
-ggchicklet
-showtext
+- dplyr
+- stringr
+- sp
+- ggplot2
+- plyr
+- readODS
+- gmodels
+- Rmisc
+- DescTools
+- data.table
+- Hmisc
+- leaflet
+- rgeos
+- raster
+- plotly
                
 These scripts were written in R version (4.0.2) and RStudio Version 1.1.383. 
 
